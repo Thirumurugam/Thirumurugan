@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1d4ed8" />
+      <stop offset="50%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <linearGradient id="crossGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <linearGradient id="birdGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="70%" stop-color="#e0f2fe" />
+      <stop offset="100%" stop-color="#bae6fd" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- Squircle Base with Glow -->
+  <rect x="8" y="8" width="104" height="104" rx="28" fill="url(#bgGrad)" filter="url(#shadow)" />
+  <rect x="9" y="9" width="102" height="102" rx="27" fill="none" stroke="rgba(255, 255, 255, 0.35)" stroke-width="1.5" />
+
+  <!-- Medical Hospital Cross Symbol -->
+  <g filter="url(#glow)">
+    <!-- Vertical bar -->
+    <rect x="47" y="24" width="26" height="72" rx="7" fill="url(#crossGrad)" stroke="#ffffff" stroke-width="2" />
+    <!-- Horizontal bar -->
+    <rect x="24" y="47" width="72" height="26" rx="7" fill="url(#crossGrad)" stroke="#ffffff" stroke-width="2" />
+  </g>
+
+  <!-- Graceful Flying Dove / Care Bird Symbol -->
+  <g filter="url(#shadow)">
+    <!-- Bird Wings & Body -->
+    <path d="M 36 78 
+             C 42 62, 54 48, 70 38 
+             C 74 35, 80 32, 86 32 
+             C 88 32, 90 34, 88 37 
+             C 84 42, 78 48, 72 52 
+             C 78 52, 84 51, 91 48 
+             C 93 47, 94 49, 93 51 
+             C 88 58, 80 64, 72 67 
+             C 66 69, 60 74, 56 82 
+             C 52 76, 44 74, 36 78 Z" 
+          fill="url(#birdGrad)" />
+    
+    <!-- Bird Head & Beak -->
+    <path d="M 86 32 
+             C 89 31, 93 30, 96 29 
+             C 94 32, 92 34, 88 36 Z" 
+          fill="#f59e0b" />
+    
+    <!-- Eye -->
+    <circle cx="82" cy="35" r="2" fill="#1e3a8a" />
+    
+    <!-- Wing Feathers Highlights -->
+    <path d="M 52 52 C 58 44, 68 39, 78 36" fill="none" stroke="rgba(30, 58, 138, 0.2)" stroke-width="1.5" stroke-linecap="round" />
+    <path d="M 58 60 C 65 54, 74 50, 82 48" fill="none" stroke="rgba(30, 58, 138, 0.2)" stroke-width="1.5" stroke-linecap="round" />
+  </g>
+</svg>

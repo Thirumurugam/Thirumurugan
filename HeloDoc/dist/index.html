@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>HeloDoc - Hospital Navigation Assistant</title>
+  <meta name="description" content="HeloDoc helps elderly patients and doctors with hospital indoor room navigation, multilingual AI voice guidance, appointment booking, digital prescriptions, and government health schemes.">
+  
+  <!-- PWA & Mobile Optimizations -->
+  <meta name="theme-color" content="#1e40af">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HeloDoc">
+  <meta name="application-name" content="HeloDoc">
+  <meta name="msapplication-TileColor" content="#1e40af">
+  
+  <!-- Icons -->
+  <link rel="icon" type="image/jpeg" href="/assets/app-icon.jpg">
+  <link rel="apple-touch-icon" href="/assets/app-icon.jpg">
+  <link rel="apple-touch-icon" sizes="152x152" href="/assets/app-icon.jpg">
+  <link rel="apple-touch-icon" sizes="167x167" href="/assets/app-icon.jpg">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/app-icon.jpg">
+  
+  <!-- Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- App assets -->
+  <script type="module" crossorigin src="/assets/index-CAA2QeKQ.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-Ho9YphY3.css">
+</head>
+<body class="theme-light">
+  <div id="root"></div>
+
+  <!-- PWA Install Banner -->
+  <div id="pwa-install-banner" style="display:none; position:fixed; bottom:0; left:0; right:0; background:#1e40af; color:#fff; padding:16px; z-index:9999; align-items:center; justify-content:space-between; gap:12px; box-shadow:0 -4px 20px rgba(0,0,0,0.3);">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <img src="/assets/app-icon.jpg" style="width:44px; height:44px; border-radius:10px;" alt="HeloDoc">
+      <div>
+        <div style="font-weight:700; font-size:15px;">Install HeloDoc App</div>
+        <div style="font-size:12px; opacity:0.85;">Add to home screen for instant access</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button id="pwa-install-btn" style="background:#fff; color:#1e40af; border:none; padding:10px 18px; border-radius:8px; font-weight:700; cursor:pointer; font-size:14px;">Install</button>
+      <button id="pwa-dismiss-btn" style="background:rgba(255,255,255,0.2); color:#fff; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; font-size:14px;">✕</button>
+    </div>
+  </div>
+
+  <!-- Service Worker Registration -->
+  <script>
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => {
+            console.log('[HeloDoc] Service Worker registered:', reg.scope);
+          })
+          .catch(err => {
+            console.warn('[HeloDoc] Service Worker registration failed:', err);
+          });
+      });
+    }
+
+    // PWA Install Prompt
+    let deferredPrompt = null;
+    const banner = document.getElementById('pwa-install-banner');
+    const installBtn = document.getElementById('pwa-install-btn');
+    const dismissBtn = document.getElementById('pwa-dismiss-btn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // Show install banner after 3 seconds
+      setTimeout(() => {
+        if (!localStorage.getItem('helodoc-pwa-dismissed')) {
+          banner.style.display = 'flex';
+        }
+      }, 3000);
+    });
+
+    installBtn && installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log('[HeloDoc] PWA install outcome:', outcome);
+        deferredPrompt = null;
+        banner.style.display = 'none';
+      }
+    });
+
+    dismissBtn && dismissBtn.addEventListener('click', () => {
+      banner.style.display = 'none';
+      localStorage.setItem('helodoc-pwa-dismissed', '1');
+    });
+
+    // Handle iOS standalone mode detection
+    if (window.navigator.standalone === true) {
+      document.body.classList.add('pwa-standalone');
+    }
+    
+    // Handle app installed event
+    window.addEventListener('appinstalled', () => {
+      console.log('[HeloDoc] App installed successfully!');
+      banner.style.display = 'none';
+      deferredPrompt = null;
+    });
+  </script>
+</body>
+</html>

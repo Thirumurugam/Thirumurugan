@@ -1,0 +1,55 @@
+{
+  "name": "HeloDoc - Hospital Navigation Assistant",
+  "short_name": "HeloDoc",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui", "browser"],
+  "background_color": "#0f172a",
+  "theme_color": "#1e40af",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "description": "HeloDoc - Smart Hospital Navigation for Elderly Patients. Indoor 3D room navigation, multilingual AI voice guidance, appointment booking, digital prescriptions, government health schemes, and pharmacy ordering.",
+  "categories": ["medical", "health", "navigation"],
+  "screenshots": [],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/assets/app-icon.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/app-icon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Emergency SOS",
+      "short_name": "SOS",
+      "description": "Send emergency alert immediately",
+      "url": "/?section=emergency",
+      "icons": [{ "src": "/assets/app-icon.jpg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Find My Room",
+      "short_name": "Navigate",
+      "description": "Navigate to your hospital room",
+      "url": "/?section=navigation",
+      "icons": [{ "src": "/assets/app-icon.jpg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Book Appointment",
+      "short_name": "Appt",
+      "description": "Book a doctor appointment",
+      "url": "/?section=appointments",
+      "icons": [{ "src": "/assets/app-icon.jpg", "sizes": "96x96" }]
+    }
+  ]
+}

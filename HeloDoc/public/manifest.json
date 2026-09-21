@@ -1,0 +1,24 @@
+{
+  "name": "HeloDoc - Medical & Hospital Navigation Assistant",
+  "short_name": "HeloDoc",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e40af",
+  "orientation": "portrait-primary",
+  "description": "HeloDoc hospital assistant for elderly patients and doctors with indoor room navigation, multilingual AI voice guidance, appointment tokens, digital prescriptions, and health scheme subsidies.",
+  "icons": [
+    {
+      "src": "assets/app-icon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231e40af'/><rect x='38' y='18' width='24' height='64' rx='6' fill='%2338bdf8'/><rect x='18' y='38' width='64' height='24' rx='6' fill='%2338bdf8'/><path d='M30 65 C35 45, 55 35, 75 30 C65 48, 52 55, 48 70 C42 62, 35 64, 30 65 Z' fill='%23ffffff'/><circle cx='68' cy='36' r='2' fill='%231e40af'/></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

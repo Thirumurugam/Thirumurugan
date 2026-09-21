@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HeloDoc - Medical & Hospital Navigation Assistant</title>
+  <meta name="description" content="HeloDoc helps elderly patients and doctors with hospital indoor room navigation, multilingual AI voice guidance, appointment booking, digital prescriptions, and government health schemes.">
+  <meta name="theme-color" content="#1e40af">
+  <link rel="icon" type="image/jpeg" href="assets/app-icon.jpg">
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-light">
+
+  <!-- Desktop Top Navigation Bar -->
+  <header class="app-top-header">
+    <div class="header-branding">
+      <div class="logo-badge" title="HeloDoc - Smart Medical Care Assistant">
+        <img src="assets/app-icon.jpg" alt="HeloDoc App Logo" class="app-brand-logo-img">
+      </div>
+      <div class="brand-text">
+        <h1>Helo<span>Doc</span></h1>
+        <p class="tagline" data-i18n="tagline">Smart Medical & Hospital Care Guide</p>
+      </div>
+    </div>
+
+    <div class="top-controls">
+      <!-- Device Frame Switcher -->
+      <div class="device-switcher" title="Switch Device Preview">
+        <button id="btn-view-iphone" class="device-btn active" onclick="setDeviceView('iphone')" aria-label="iPhone View">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="4"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="3"/></svg>
+          <span>iPhone 15</span>
+        </button>
+        <button id="btn-view-android" class="device-btn" onclick="setDeviceView('android')" aria-label="Android View">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="4" r="1"/></svg>
+          <span>Android</span>
+        </button>
+        <button id="btn-view-fullscreen" class="device-btn" onclick="setDeviceView('fullscreen')" aria-label="Full Responsive View">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <span>Fullscreen</span>
+        </button>
+      </div>
+
+      <!-- Quick Accessibility & Elder Mode Controls -->
+      <div class="quick-access-tools">
+        <!-- Language Selector -->
+        <div class="lang-dropdown-wrapper">
+          <span class="lang-icon">🌐</span>
+          <select id="language-select" onchange="changeLanguage(this.value)" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="ta">தமிழ் (Tamil)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+            <option value="ml">മലയാളം (Malayalam)</option>
+            <option value="es">Español (Spanish)</option>
+          </select>
+        </div>
+
+        <!-- Senior Care Mode Toggle -->
+        <button id="btn-elder-mode" class="tool-btn elder-btn" onclick="toggleElderMode()" title="Senior Care Mode (Large Text, High Contrast, Audio Guidance)">
+          <span class="elder-icon">👵👴</span>
+          <span class="elder-label" data-i18n="elderMode">Senior Care Mode</span>
+        </button>
+
+        <!-- Speech Audio Guide Toggle -->
+        <button id="btn-audio-guide" class="tool-btn audio-btn" onclick="toggleAudioGuide()" title="Voice Guide / Read Page Aloud">
+          <span id="audio-icon">🔊</span>
+          <span data-i18n="voiceGuide">Voice Guide</span>
+        </button>
+
+        <!-- Role Toggle (Patient / Doctor) -->
+        <div class="role-selector">
+          <button id="role-patient" class="role-btn active" onclick="switchRole('patient')">
+            <span>👤</span> <span data-i18n="patientRole">Patient</span>
+          </button>
+          <button id="role-doctor" class="role-btn" onclick="switchRole('doctor')">
+            <span>👨‍⚕️</span> <span data-i18n="doctorRole">Doctor</span>
+          </button>
+        </div>
+
+        <!-- Sign In / Out Action -->
+        <button id="btn-top-auth" class="tool-btn" onclick="navigateToTab('auth')" title="Sign In or Switch Account">
+          <span id="top-auth-icon">🔑</span>
+          <span id="top-auth-label">Sign In</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Viewport Container (App Shell) -->
+  <main class="app-viewport-wrapper" id="viewport-wrapper">
+    <!-- Interactive 3D WebGL Medical Space Background Canvas -->
+    <div id="medical-3d-bg-canvas" class="medical-3d-background-canvas" aria-hidden="true"></div>
+
+    <!-- Device Frame Simulator -->
+    <div class="mobile-device-frame frame-iphone" id="device-frame">
+      <!-- Device Hardware Features -->
+      <div class="device-notch" id="device-notch">
+        <div class="dynamic-island" id="dynamic-island">
+          <div class="island-camera"></div>
+          <div class="island-indicator" id="island-indicator">
+            <span class="island-pulse"></span>
+            <span class="island-text" id="island-text">HeloDoc Active</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- App Screen Inside Device -->
+      <div class="device-screen" id="app-screen">
+        <!-- In-App 3D Multi-Layer Ambient Backdrop -->
+        <div class="in-app-3d-backdrop" id="in-app-3d-backdrop" aria-hidden="true">
+          <canvas id="in-app-3d-canvas" class="in-app-3d-canvas"></canvas>
+          <div class="ambient-3d-orb orb-cyan"></div>
+          <div class="ambient-3d-orb orb-blue"></div>
+          <div class="ambient-3d-orb orb-emerald"></div>
+          <div class="ambient-3d-orb orb-violet"></div>
+          <div class="perspective-grid-3d"></div>
+          <div class="ecg-monitor-ticker">
+            <svg class="ecg-svg" viewBox="0 0 600 32" preserveAspectRatio="none">
+              <path class="ecg-pulse-line" d="M0,16 L120,16 L130,16 L135,6 L142,26 L148,2 L154,22 L158,16 L200,16 L320,16 L330,16 L335,6 L342,26 L348,2 L354,22 L358,16 L400,16 L520,16 L530,16 L535,6 L542,26 L548,2 L554,22 L558,16 L600,16" />
+            </svg>
+          </div>
+        </div>
+        
+        <!-- Mobile In-App Status Bar -->
+        <div class="mobile-status-bar">
+          <span class="status-time" id="status-clock">09:41</span>
+          <div class="status-hospital-tag" onclick="promptHospitalChange()" title="Tap to change hospital location">
+            <span class="h-dot"></span>
+            <span id="current-hospital-name">City Care Multi-Specialty</span>
+          </div>
+          <div class="status-icons">
+            <span>5G</span>
+            <span>📶</span>
+            <span>🔋 98%</span>
+          </div>
+        </div>
+
+        <!-- In-App Header & SOS Emergency Alert Banner -->
+        <div class="in-app-header" id="in-app-header">
+          <div class="user-greeting-row">
+            <div class="avatar-info" onclick="navigateToTab('profile')">
+              <div class="avatar-circle" id="user-avatar-badge">👴</div>
+              <div class="user-meta">
+                <span class="greeting-prefix" data-i18n="welcomeBack">Welcome,</span>
+                <strong class="user-name" id="display-user-name">Mr. Ramachandran (68y)</strong>
+                <span class="user-role-badge" id="display-role-badge">Senior Citizen Patient</span>
+              </div>
+            </div>
+            <div class="header-action-buttons">
+              <!-- AI Voice Assistant Button -->
+              <button class="icon-action-btn ai-voice-trigger" onclick="openAIGuideModal()" title="Ask AI Guide in Any Language">
+                <span class="ai-sparkle">✨</span>
+                <span class="btn-text" data-i18n="askAi">AI Guide</span>
+              </button>
+              <!-- SOS Emergency Button -->
+              <button class="sos-btn" onclick="triggerSOSModal()" title="Emergency Help & Ambulance">
+                <span>🚨</span>
+                <span class="sos-text">SOS</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Elder Audio Banner -->
+          <div class="audio-banner-strip" id="audio-banner">
+            <button class="audio-strip-play" onclick="speakCurrentScreenText()" title="Listen to this page">
+              <span>🔊</span>
+              <span id="audio-strip-text" data-i18n="listenPage">Tap to hear instructions in your language</span>
+            </button>
+            <button class="audio-strip-mic" onclick="startVoiceRecognition()" title="Speak your question">
+              <span>🎙️</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Screen Content Container (Tab Pages) -->
+        <div class="tab-content-container" id="tab-container">
+
+          <!-- ==================== TAB 0: AUTH / SIGN-IN HOME SCREEN ==================== -->
+          <section class="tab-page" id="tab-auth">
+            <div class="auth-landing-view">
+              <div class="auth-header-hero">
+                <div class="auth-logo-box">
+                  <img src="assets/logo.svg" alt="HeloDoc Blue Hospital Bird Icon">
+                </div>
+                <h2>Helo<span>Doc</span></h2>
+                <p data-i18n="authHeroSub">Your Trusted Medical & Hospital Guide</p>
+              </div>
+
+              <!-- Hospital Location Selector -->
+              <div class="auth-hospital-picker">
+                <label data-i18n="hospitalBranchLabel">📍 Select Hospital Location / Branch:</label>
+                <select id="auth-hospital-select" class="hospital-select-input" onchange="updateHospitalLocation(this.value)">
+                  <option value="City Care Multi-Specialty Hospital, Central Atrium" selected>🏥 City Care Multi-Specialty (Current)</option>
+                  <option value="Apollo Healthcare Super-Specialty, Main Block">🏥 Apollo Healthcare Super-Specialty</option>
+                  <option value="Metro Memorial District Govt Hospital">🏥 Metro Memorial District Hospital (Govt)</option>
+                  <option value="auto">📡 Auto-Detect via GPS Geolocation</option>
+                </select>
+              </div>
+
+              <!-- Auth Main Glass Card -->
+              <div class="auth-main-card">
+                <div class="auth-method-tabs">
+                  <button class="auth-method-tab active" id="auth-tab-btn-phone" onclick="switchAuthMethod('phone')">
+                    📱 <span data-i18n="phoneLogin">Phone Number</span>
+                  </button>
+                  <button class="auth-method-tab" id="auth-tab-btn-google" onclick="switchAuthMethod('google')">
+                    <svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:middle;"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.26 21.36 7.37 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.17 0 9.97 0 12s.46 3.83 1.26 5.42l4.02-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.37 0 3.26 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+                    <span>Google (Gmail)</span>
+                  </button>
+                </div>
+
+                <!-- Phone Login Panel -->
+                <div id="auth-panel-phone">
+                  <div class="form-group">
+                    <label class="form-label" data-i18n="enterMobileNo">Enter 10-Digit Mobile Number:</label>
+                    <div class="phone-input-group">
+                      <select class="country-code-select" id="auth-country-code">
+                        <option value="+91" selected>🇮🇳 +91</option>
+                        <option value="+1">🇺🇸 +1</option>
+                        <option value="+44">🇬🇧 +44</option>
+                        <option value="+971">🇦🇪 +971</option>
+                        <option value="+65">🇸🇬 +65</option>
+                      </select>
+                      <input type="tel" id="auth-phone-field" class="phone-input" placeholder="98765 43210" value="9876543210">
+                    </div>
+                  </div>
+
+                  <button class="btn btn-primary btn-full" id="btn-send-otp" onclick="handleSendOTP()">
+                    📩 <span data-i18n="sendOtpCode">Send Verification OTP Code</span>
+                  </button>
+
+                  <!-- 6-digit OTP Box -->
+                  <div id="auth-otp-section" style="display:none; margin-top:14px;">
+                    <label class="form-label" data-i18n="enterOtpPrompt">Enter 6-Digit Code sent via SMS:</label>
+                    <div class="otp-digit-inputs">
+                      <input type="text" maxlength="1" class="otp-box" value="7">
+                      <input type="text" maxlength="1" class="otp-box" value="2">
+                      <input type="text" maxlength="1" class="otp-box" value="9">
+                      <input type="text" maxlength="1" class="otp-box" value="4">
+                      <input type="text" maxlength="1" class="otp-box" value="1">
+                      <input type="text" maxlength="1" class="otp-box" value="8">
+                    </div>
+                    <button class="btn btn-success btn-full" onclick="handleVerifyOTP()">
+                      ✅ <span data-i18n="verifyAndEnter">Verify OTP & Enter Hospital</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Google Login Panel -->
+                <div id="auth-panel-google" style="display:none;">
+                  <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;" data-i18n="googleHelper">
+                    Fast and verified sign-in with your official Gmail account.
+                  </p>
+                  <button class="google-auth-btn" onclick="handleGoogleSignIn()">
+                    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.26 21.36 7.37 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.17 0 9.97 0 12s.46 3.83 1.26 5.42l4.02-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.37 0 3.26 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+                    <span>Sign in with Google</span>
+                  </button>
+                </div>
+
+                <div class="auth-divider">
+                  <span>OR FOR SENIORS</span>
+                </div>
+
+                <!-- 1-Tap Quick Senior Access -->
+                <button class="senior-quick-login-btn" onclick="handleQuickSeniorAccess()">
+                  <span>👵👴</span>
+                  <span data-i18n="quickSeniorLogin">1-Tap Instant Senior Access (No Typing)</span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== TAB 1: HOME PAGE ==================== -->
+          <section class="tab-page active" id="tab-home">
+            <!-- Homepage Sign In & Account Quick Access Card -->
+            <div class="feature-card home-auth-card">
+              <div class="home-auth-header" style="display:flex; align-items:center; gap:12px;">
+                <div class="user-avatar-badge" style="width:48px; height:48px; border-radius:12px; overflow:hidden; border:2px solid var(--primary); flex-shrink:0;">
+                  <img src="assets/app-icon.jpg" alt="HeloDoc Logo" class="home-user-avatar" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <div class="home-user-meta" style="flex:1;">
+                  <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <span class="user-status-dot online"></span>
+                    <h3 id="home-account-title" style="margin:0; font-size:1.05rem; color:var(--text-main);">Mr. Ramachandran V.</h3>
+                    <span class="badge badge-sm tag-green" style="font-size:0.68rem; font-weight:700;">Ayushman Verified</span>
+                  </div>
+                  <p id="home-account-sub" style="font-size:0.78rem; color:var(--text-muted); margin:3px 0 0 0;">ID: HD-2026-8941 • Senior Citizen (68 yrs) • O+ Blood</p>
+                </div>
+              </div>
+
+              <!-- Sign In / Log In Actions Grid -->
+              <div class="home-auth-actions-grid mt-3" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px;">
+                <button class="btn btn-outline btn-sm" onclick="navigateToTab('auth')" style="font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px;">
+                  🔑 <span data-i18n="signInBtn">Sign In / Switch Account</span>
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="handleQuickSeniorAccess()" style="font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px; background:linear-gradient(135deg, #1d4ed8, #0284c7);">
+                  👵 <span data-i18n="quickSeniorAccess">1-Tap Senior Login</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Active Appointment / Token Card -->
+            <div class="feature-card highlight-card" id="home-appointment-card">
+              <div class="card-header-row">
+                <div class="card-tag tag-green">
+                  <span class="pulse-dot"></span>
+                  <span data-i18n="liveAppointment">Today's Appointment</span>
+                </div>
+                <div class="token-number-box">
+                  <span class="token-label" data-i18n="tokenNo">TOKEN</span>
+                  <strong class="token-val" id="active-token-no">#A-14</strong>
+                </div>
+              </div>
+
+              <div class="appointment-details">
+                <h3 class="doctor-name" id="active-doctor-name">Dr. Rajesh Kumar (Orthopedic)</h3>
+                <p class="treatment-type">🦵 <span id="active-treatment-name" data-i18n="kneeCheckup">Knee Joint Pain & Arthritis Followup</span></p>
+                <div class="time-room-badges">
+                  <span class="badge time-badge">⏰ <strong id="active-appt-time">10:30 AM</strong></span>
+                  <span class="badge room-badge highlight-room" onclick="quickGuideToRoom('Room 104', '1st Floor')">
+                    📍 <span data-i18n="roomLabel">Room</span>: <strong id="active-appt-room">Room 104 (1st Floor)</strong> 
+                    <span class="guide-link" data-i18n="guideMeBtn">👉 Guide Me</span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Quick Action Inside Card -->
+              <div class="card-actions-row">
+                <button class="btn btn-primary btn-sm" onclick="quickGuideToRoom('Room 104', '1st Floor')">
+                  🗺️ <span data-i18n="openMapNav">Show Hospital Room Path</span>
+                </button>
+                <button class="btn btn-outline btn-sm" onclick="openDoctorPrescriptionView()">
+                  📋 <span data-i18n="viewPrescription">Doctor Notes</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Main Quick Navigation Grid (Specially Designed for Seniors) -->
+            <div class="section-title-row">
+              <h2 data-i18n="quickServices">What do you need help with?</h2>
+              <span class="sub-helper" data-i18n="tapAnyService">Large touch buttons for easy use</span>
+            </div>
+
+            <div class="senior-action-grid">
+              <!-- Action 1: Find Room / Hospital Map -->
+              <div class="senior-grid-card nav-color" onclick="navigateToTab('map')">
+                <div class="card-icon-bubble">🗺️</div>
+                <div class="card-text-col">
+                  <h3 data-i18n="findRoomTitle">Find My Room</h3>
+                  <p data-i18n="findRoomDesc">Walk step-by-step to your doctor's room</p>
+                </div>
+                <div class="card-arrow">➜</div>
+              </div>
+
+              <!-- Action 2: Book Doctor Appointment -->
+              <div class="senior-grid-card book-color" onclick="navigateToTab('appointments')">
+                <div class="card-icon-bubble">📅</div>
+                <div class="card-text-col">
+                  <h3 data-i18n="bookApptTitle">Book Appointment</h3>
+                  <p data-i18n="bookApptDesc">Pick treatment, doctor & date to save time</p>
+                </div>
+                <div class="card-arrow">➜</div>
+              </div>
+
+              <!-- Action 3: Govt Schemes & Low Cost Subsidies -->
+              <div class="senior-grid-card scheme-color" onclick="navigateToTab('schemes')">
+                <div class="card-icon-bubble">🏛️</div>
+                <div class="card-text-col">
+                  <h3 data-i18n="govtSchemesTitle">Govt Schemes & Subsidies</h3>
+                  <p data-i18n="govtSchemesDesc">Reduce high medical costs & claim discounts</p>
+                </div>
+                <div class="card-arrow">➜</div>
+              </div>
+
+              <!-- Action 4: Medicines & Timings -->
+              <div class="senior-grid-card med-color" onclick="navigateToTab('medicines')">
+                <div class="card-icon-bubble">💊</div>
+                <div class="card-text-col">
+                  <h3 data-i18n="myMedicinesTitle">My Medicines & Timings</h3>
+                  <p data-i18n="myMedicinesDesc">Morning, Afternoon & Night pill reminder</p>
+                </div>
+                <div class="card-arrow">➜</div>
+              </div>
+
+              <!-- Action 5: AI Multilingual Voice Guide -->
+              <div class="senior-grid-card ai-color" onclick="openAIGuideModal()">
+                <div class="card-icon-bubble">🗣️</div>
+                <div class="card-text-col">
+                  <h3 data-i18n="aiVoiceAssistantTitle">Talk to AI Medical Guide</h3>
+                  <p data-i18n="aiVoiceAssistantDesc">Speak or ask questions in your language</p>
+                </div>
+                <div class="card-arrow">➜</div>
+              </div>
+
+              <!-- Action 6: Online Payment & Bill -->
+              <div class="senior-grid-card pay-color" onclick="openPaymentModal()">
+                <div class="card-icon-bubble">💳</div>
+                <div class="card-text-col">
+                  <h3 data-i18n="payBillTitle">Pay Bill & View Receipts</h3>
+                  <p data-i18n="payBillDesc">Online UPI, card payment & scheme waiver</p>
+                </div>
+                <div class="card-arrow">➜</div>
+              </div>
+            </div>
+
+            <!-- Daily Medication Reminder Widget -->
+            <div class="feature-card med-schedule-card">
+              <div class="card-header-row">
+                <h3 data-i18n="todayMeds">Today's Medicine Schedule</h3>
+                <span class="badge time-badge" id="current-pill-slot">Afternoon: 01:30 PM</span>
+              </div>
+              <div class="pill-checklist" id="home-pill-list">
+                <!-- Injected via JS -->
+              </div>
+              <button class="btn btn-secondary btn-full btn-sm mt-3" onclick="navigateToTab('medicines')">
+                <span data-i18n="viewFullPrescription">View All Prescriptions & Doctors' Notes ➜</span>
+              </button>
+            </div>
+
+            <!-- Emergency & Family Contact Card -->
+            <div class="feature-card emergency-contact-card">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <span style="font-size:1.8rem;">👨‍👩‍👧</span>
+                  <div>
+                    <h4 data-i18n="emergencyCaregiver" style="font-size:0.92rem;">Primary Caregiver / Family</h4>
+                    <p id="caregiver-name" style="font-size:0.78rem; color:var(--text-muted);">Kavitha R (Daughter) - +91 98765 43210</p>
+                  </div>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="callCaregiver()">
+                  📞 <span data-i18n="callCaregiver">Call</span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== TAB 2: HOSPITAL MAP & ROOM NAVIGATOR ==================== -->
+          <section class="tab-page" id="tab-map">
+            <div class="map-top-bar">
+              <div class="search-room-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="map-room-search" placeholder="Search Doctor, Room No (e.g. 104, 201) or Problem..." oninput="filterHospitalRooms(this.value)">
+                <button class="voice-search-btn" onclick="startVoiceMapSearch()" title="Voice search room">🎙️</button>
+              </div>
+
+              <!-- Floor Selector Tabs -->
+              <div class="floor-selector-pills">
+                <button class="floor-pill" onclick="switchFloor('ground')" id="floor-btn-ground">Ground Floor</button>
+                <button class="floor-pill active" onclick="switchFloor('floor1')" id="floor-btn-floor1">1st Floor (401-403 OPD)</button>
+                <button class="floor-pill" onclick="switchFloor('floor2')" id="floor-btn-floor2">2nd Floor (404 ICU / 405 Ward)</button>
+                <button class="floor-pill" onclick="switchFloor('floor3')" id="floor-btn-floor3">3rd Floor (406-410 Postnatal)</button>
+              </div>
+            </div>
+
+            <!-- Active Navigation Banner -->
+            <div class="nav-direction-banner" id="nav-direction-banner">
+              <div class="nav-instruction-col">
+                <span class="nav-step-badge" id="nav-step-num">Step 1 of 3</span>
+                <h4 id="nav-instruction-text">From Main Entrance, walk straight 15m towards Elevator A.</h4>
+                <p id="nav-target-meta">Target: <strong>Room 104 - Orthopedics (Dr. Rajesh Kumar)</strong></p>
+              </div>
+              <div class="nav-banner-actions">
+                <button class="btn-voice-nav" onclick="speakNavigationStep()" title="Hear Direction">🔊</button>
+                <button class="btn-step-nav" onclick="nextNavigationStep()" title="Next Step">Next ➜</button>
+              </div>
+            </div>
+
+            <!-- 3D vs 2D Map Visualization Mode Switcher -->
+            <div class="map-view-switcher-bar">
+              <button class="map-mode-pill active" id="btn-map-mode-3d" onclick="setHospitalMapMode('3d')">
+                <span class="pill-icon">🌐</span>
+                <span>3D Digital Twin Map</span>
+              </button>
+              <button class="map-mode-pill" id="btn-map-mode-2d" onclick="setHospitalMapMode('2d')">
+                <span class="pill-icon">📐</span>
+                <span>2D Floor Plan</span>
+              </button>
+            </div>
+
+            <!-- Interactive Hospital 3D / 2D Map Container -->
+            <div class="hospital-map-container" id="hospital-map-container">
+              <!-- 3D WebGL Hospital Model Container -->
+              <div class="hospital-3d-viewport" id="hospital-3d-viewport">
+                <div id="hospital-3d-webgl-canvas" class="hospital-3d-webgl-canvas"></div>
+                
+                <!-- 3D Overlay HUD Controls -->
+                <div class="map-3d-hud-overlay">
+                  <div class="hud-top-row">
+                    <div class="hud-badge-telemetry">
+                      <span class="hud-live-dot"></span>
+                      <span id="hud-target-indicator">Target: Room 104 • 1st Floor</span>
+                    </div>
+                    <div class="hud-view-actions">
+                      <button class="hud-btn active" id="btn-3d-cam-iso" onclick="set3DCameraAngle('isometric')" title="Isometric 3D View">Isometric</button>
+                      <button class="hud-btn" id="btn-3d-cam-walk" onclick="set3DCameraAngle('walk')" title="Eye-Level Corridor View">Corridor</button>
+                      <button class="hud-btn" id="btn-3d-cam-top" onclick="set3DCameraAngle('topdown')" title="Top-Down Plan">Top</button>
+                      <button class="hud-btn" id="btn-3d-cam-tour" onclick="toggle3DAutoTour()" title="Auto Orbit Tour">🔄 Tour</button>
+                    </div>
+                  </div>
+
+                  <!-- 3D Quick Zoom & Center Float Controls -->
+                  <div class="hud-right-controls">
+                    <button class="hud-circle-btn" onclick="zoom3D(0.82)" title="Zoom In 3D">➕</button>
+                    <button class="hud-circle-btn" onclick="zoom3D(1.22)" title="Zoom Out 3D">➖</button>
+                    <button class="hud-circle-btn" onclick="focus3DTarget()" title="Center Target Room">🎯</button>
+                  </div>
+
+                  <div class="hud-bottom-tip">
+                    <span>🖐️ Drag to rotate 3D hospital • Click any room to inspect</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2D SVG Interactive Blueprint (Toggled when 2D mode selected) -->
+              <div class="map-scroll-area" id="map-canvas-area" style="display:none;">
+                <div class="map-overlay-compass">🧭 N</div>
+                <div class="map-zoom-controls">
+                  <button onclick="zoomMap(1.2)">➕</button>
+                  <button onclick="zoomMap(0.8)">➖</button>
+                  <button onclick="resetMap()">🔄</button>
+                </div>
+                <svg id="hospital-svg-map" viewBox="0 0 800 600" width="100%" height="100%">
+                  <!-- Background grid -->
+                  <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(29, 78, 216, 0.06)" stroke-width="1"/>
+                    </pattern>
+                    <!-- Animated Path Marker -->
+                    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1d4ed8" />
+                    </marker>
+                  </defs>
+
+                  <rect width="100%" height="100%" fill="url(#grid)" />
+
+                  <!-- Floor Layout Injected dynamically via JS based on current Floor -->
+                  <g id="svg-floor-geometry"></g>
+                  
+                  <!-- Animated Navigation Route Path -->
+                  <path id="svg-nav-path" d="" fill="none" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="10, 6" class="animated-path" marker-end="url(#arrow)"/>
+
+                  <!-- Patient Current Location Marker -->
+                  <g id="svg-user-pin" transform="translate(100, 520)">
+                    <circle cx="0" cy="0" r="16" fill="rgba(29, 78, 216, 0.25)" class="pulse-pin" />
+                    <circle cx="0" cy="0" r="8" fill="#1d4ed8" stroke="#ffffff" stroke-width="2" />
+                    <text x="0" y="24" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">You (Entrance)</text>
+                  </g>
+
+                  <!-- Destination Target Pin -->
+                  <g id="svg-target-pin" transform="translate(620, 200)" style="display:none;">
+                    <circle cx="0" cy="0" r="20" fill="rgba(239, 68, 68, 0.2)" class="pulse-pin-red" />
+                    <circle cx="0" cy="0" r="10" fill="#ef4444" stroke="#ffffff" stroke-width="2" />
+                    <text x="0" y="-14" text-anchor="middle" font-size="12" font-weight="bold" fill="#ef4444">Destination Room</text>
+                  </g>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Quick 3D Key Facility Teleport Destination Chips -->
+            <div class="quick-facility-chips-strip">
+              <span class="chips-label">🎯 3D Quick Destinations:</span>
+              <div class="facility-chips-scroll">
+                <button class="facility-chip active" onclick="focus3DFacility('Room 403', 'floor1')">
+                  🦴 Room 403 (Ortho - Dr. Rajesh)
+                </button>
+                <button class="facility-chip" onclick="focus3DFacility('Room 004', 'ground')">
+                  💊 Room 004 (Jan Aushadhi Pharmacy)
+                </button>
+                <button class="facility-chip" onclick="focus3DFacility('Room 001', 'ground')">
+                  🚨 Room 001 (Emergency ER & Trauma)
+                </button>
+                <button class="facility-chip" onclick="focus3DFacility('Room 402', 'floor1')">
+                  ❤️ Room 402 (Cardiology Clinic)
+                </button>
+                <button class="facility-chip" onclick="focus3DFacility('Room 007', 'ground')">
+                  🔬 Room 007 (Pathology Blood Lab)
+                </button>
+                <button class="facility-chip" onclick="focus3DFacility('Room 404', 'floor2')">
+                  🛏️ Room 404 (ICU Critical Care)
+                </button>
+                <button class="facility-chip" onclick="focus3DFacility('Room 406', 'floor3')">
+                  👶 Room 406 (Postnatal Maternity)
+                </button>
+              </div>
+            </div>
+
+            <!-- Quick Directory of Rooms on This Floor -->
+            <div class="room-directory-section">
+              <h3 data-i18n="roomsOnFloor">Rooms & Services on this Floor</h3>
+              <div class="room-cards-list" id="room-cards-list">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== TAB 3: APPOINTMENTS & DOCTOR BOOKING ==================== -->
+          <section class="tab-page" id="tab-appointments">
+            <div class="page-title-header">
+              <h2 data-i18n="bookAppointmentHeader">Book Doctor & Treatment Appointment</h2>
+              <p data-i18n="saveTimeQueue">Select your health problem to get the right room and token</p>
+            </div>
+
+            <!-- Step 1: Select Health Problem or Specialty -->
+            <div class="booking-card">
+              <label class="form-label" data-i18n="selectProblem">1. What treatment or health problem do you have?</label>
+              <div class="specialty-picker-grid" id="specialty-picker-grid">
+                <button class="specialty-btn" onclick="selectSpecialty('derm', this)">
+                  <span class="spec-icon">✨</span>
+                  <span class="spec-name">Skin & Hair / Dermatology</span>
+                  <small>Room 401 (1st Floor)</small>
+                </button>
+                <button class="specialty-btn" onclick="selectSpecialty('cardio', this)">
+                  <span class="spec-icon">❤️</span>
+                  <span class="spec-name" data-i18n="specCardio">Heart / Cardiology</span>
+                  <small>Room 402 (1st Floor)</small>
+                </button>
+                <button class="specialty-btn active" onclick="selectSpecialty('ortho', this)">
+                  <span class="spec-icon">🦵</span>
+                  <span class="spec-name" data-i18n="specOrtho">Bone & Joint / Ortho</span>
+                  <small>Room 403 (1st Floor)</small>
+                </button>
+                <button class="specialty-btn" onclick="selectSpecialty('general', this)">
+                  <span class="spec-icon">🩺</span>
+                  <span class="spec-name" data-i18n="specGeneral">General Medicine / Ward</span>
+                  <small>Room 405 (2nd Floor)</small>
+                </button>
+                <button class="specialty-btn" onclick="selectSpecialty('neuro', this)">
+                  <span class="spec-icon">🧠</span>
+                  <span class="spec-name" data-i18n="specNeuro">ICU / Brain & Critical</span>
+                  <small>Room 404 (2nd Floor)</small>
+                </button>
+                <button class="specialty-btn" onclick="selectSpecialty('eye', this)">
+                  <span class="spec-icon">👁️</span>
+                  <span class="spec-name" data-i18n="specEye">Eye / Ophthalmology</span>
+                  <small>Room 009 (Ground)</small>
+                </button>
+              </div>
+
+              <!-- Step 2: Choose Doctor -->
+              <div class="form-group mt-4">
+                <label class="form-label" data-i18n="chooseDoctor">2. Select Available Doctor</label>
+                <div class="doctor-select-list" id="doctor-select-list">
+                  <!-- Injected via JS based on selected specialty -->
+                </div>
+              </div>
+
+              <!-- Step 3: Choose Date & Time Slot -->
+              <div class="form-group mt-4">
+                <label class="form-label" data-i18n="chooseDateTime">3. Select Date & Convenient Time Slot</label>
+                <div class="date-picker-row">
+                  <button class="date-pill active" onclick="selectApptDate('Today', this)">
+                    <strong>Today</strong>
+                    <span>Aug 22</span>
+                  </button>
+                  <button class="date-pill" onclick="selectApptDate('Tomorrow', this)">
+                    <strong>Tomorrow</strong>
+                    <span>Aug 23</span>
+                  </button>
+                  <button class="date-pill" onclick="selectApptDate('Monday', this)">
+                    <strong>Mon</strong>
+                    <span>Aug 25</span>
+                  </button>
+                </div>
+
+                <div class="time-slots-grid mt-3" id="time-slots-grid">
+                  <button class="time-slot-btn" onclick="selectTimeSlot('09:30 AM', this)">09:30 AM</button>
+                  <button class="time-slot-btn active" onclick="selectTimeSlot('10:30 AM', this)">10:30 AM</button>
+                  <button class="time-slot-btn" onclick="selectTimeSlot('11:45 AM', this)">11:45 AM</button>
+                  <button class="time-slot-btn" onclick="selectTimeSlot('03:30 PM', this)">03:30 PM</button>
+                  <button class="time-slot-btn" onclick="selectTimeSlot('05:00 PM', this)">05:00 PM</button>
+                </div>
+              </div>
+
+              <!-- Step 4: Apply Health Scheme Subsidy (Optional) -->
+              <div class="scheme-discount-box mt-4">
+                <div class="scheme-toggle-row">
+                  <div>
+                    <strong data-i18n="applyGovtSubsidy">Apply Govt Scheme / Senior Concession?</strong>
+                    <p class="scheme-sub" data-i18n="schemeSubText">Ayushman Bharat or Senior Citizen 50% discount</p>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="booking-scheme-checkbox" checked onchange="updateBookingCost()">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div class="cost-breakdown-row" id="booking-cost-breakdown">
+                  <span>Standard Consultation: <del>₹500</del></span>
+                  <span class="discounted-cost">Scheme Price: <strong>₹250 (50% Off)</strong></span>
+                </div>
+              </div>
+
+              <!-- Confirm Booking Button -->
+              <button class="btn btn-primary btn-full mt-4" onclick="confirmAppointmentBooking()">
+                ✅ <span data-i18n="confirmApptBtn">Confirm Appointment & Generate Token</span>
+              </button>
+            </div>
+
+            <!-- Existing Bookings & Past Appointments List -->
+            <div class="my-appointments-section mt-4">
+              <h3 data-i18n="myBookings">Your Appointments & Tokens</h3>
+              <div class="appointments-history-list" id="appointments-history-list">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== TAB 4: MEDICINES & PRESCRIPTION REMINDERS ==================== -->
+          <section class="tab-page" id="tab-medicines">
+            <div class="page-title-header">
+              <h2 data-i18n="medicineReminderHeader">Prescriptions & Medicine Reminders</h2>
+              <p data-i18n="medicineSubHeader">Organized by Morning, Afternoon and Night with Food Instructions</p>
+            </div>
+
+            <!-- Doctor's Latest Advice Card -->
+            <div class="feature-card doctor-summary-card">
+              <div class="card-header-row">
+                <div class="doc-header-info">
+                  <span class="doc-avatar">👨‍⚕️</span>
+                  <div>
+                    <h4 id="rx-doctor-name">Dr. Rajesh Kumar</h4>
+                    <span class="rx-date" id="rx-date">Prescribed on: Aug 22, 2026</span>
+                  </div>
+                </div>
+                <button class="btn-read-rx" onclick="speakPrescription()" title="Listen to Medicine Instructions">
+                  🔊 <span data-i18n="listenRx">Listen</span>
+                </button>
+              </div>
+
+              <div class="diagnosis-box">
+                <strong data-i18n="diagnosisLabel">Doctor's Diagnosis & Care Notes:</strong>
+                <p id="rx-diagnosis-text">Grade 2 Osteoarthritis of the Right Knee. Avoid climbing long stairs. Apply warm compress in the morning and do gentle quad strengthening exercises daily.</p>
+              </div>
+            </div>
+
+            <!-- Pill Schedule Cards (Morning, Afternoon, Night) -->
+            <div class="time-schedule-tabs">
+              <!-- Morning Section -->
+              <div class="schedule-block morning-block">
+                <div class="schedule-header">
+                  <div class="time-icon-title">
+                    <span class="time-icon">🌅</span>
+                    <div>
+                      <h3 data-i18n="morningMeds">Morning Medicines</h3>
+                      <span class="time-window">08:00 AM - 09:30 AM (Breakfast)</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="med-items-list" id="morning-med-list">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+
+              <!-- Afternoon Section -->
+              <div class="schedule-block afternoon-block">
+                <div class="schedule-header">
+                  <div class="time-icon-title">
+                    <span class="time-icon">☀️</span>
+                    <div>
+                      <h3 data-i18n="afternoonMeds">Afternoon Medicines</h3>
+                      <span class="time-window">01:30 PM - 02:30 PM (Lunch)</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="med-items-list" id="afternoon-med-list">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+
+              <!-- Night Section -->
+              <div class="schedule-block night-block">
+                <div class="schedule-header">
+                  <div class="time-icon-title">
+                    <span class="time-icon">🌙</span>
+                    <div>
+                      <h3 data-i18n="nightMeds">Night Medicines</h3>
+                      <span class="time-window">08:30 PM - 09:30 PM (Dinner & Bedtime)</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="med-items-list" id="night-med-list">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Pharmacy Room Shortcut -->
+            <div class="pharmacy-shortcut-card" onclick="quickGuideToRoom('Hospital Pharmacy', 'Ground Floor')">
+              <div class="pharmacy-icon">🏥💊</div>
+              <div>
+                <h4 data-i18n="getMedicineHospital">Obtain Medicines from Hospital Pharmacy</h4>
+                <p>Located at: <strong>Room 004 (Ground Floor)</strong> - Jan Aushadhi Generic counter available</p>
+              </div>
+              <span class="guide-link">Guide Me ➜</span>
+            </div>
+
+            <!-- Home Delivery of Prescribed Medicines Card -->
+            <div class="feature-card med-delivery-card" style="background:linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border:1.5px solid #bfdbfe; border-radius:16px; padding:16px; margin-top:16px; box-shadow:0 4px 12px rgba(37, 99, 235, 0.08);">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div style="display:flex; gap:12px; align-items:center;">
+                  <span style="font-size:2.2rem;">🚚</span>
+                  <div>
+                    <span class="badge tag-green" style="font-weight:700; font-size:0.7rem;">90% Jan Aushadhi Govt Subsidy</span>
+                    <h3 style="margin:4px 0 2px; font-size:1.1rem; color:#1e3a8a;">Deliver Medicines to Home</h3>
+                    <p style="font-size:0.8rem; color:#3b82f6; margin:0;">Fast 2-hour doorstep delivery from hospital pharmacy</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Live Order Status Banner if ordered -->
+              <div id="med-delivery-status-banner" style="display:none; margin-top:12px; background:#ffffff; border-radius:10px; padding:10px 12px; border:1px solid #93c5fd;">
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                  <span style="font-size:0.82rem; font-weight:700; color:#1e40af;">🛵 Status: Delivery Out for Home Express</span>
+                  <span class="badge tag-green" style="font-size:0.68rem;">ETA: 35 Mins</span>
+                </div>
+                <div class="delivery-progress-bar" style="height:6px; background:#e2e8f0; border-radius:3px; margin-top:8px; overflow:hidden;">
+                  <div style="width:75%; height:100%; background:#16a34a; border-radius:3px;"></div>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:10px; margin-top:14px;">
+                <button class="btn btn-primary btn-full" onclick="openMedicineDeliveryModal()" style="font-weight:700; background:#1d4ed8; box-shadow:0 4px 12px rgba(29, 78, 216, 0.3);">
+                  📦 Order Doorstep Home Delivery
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== TAB 5: GOVT & HOSPITAL SCHEMES ==================== -->
+          <section class="tab-page" id="tab-schemes">
+            <div class="page-title-header">
+              <h2 data-i18n="schemesHeader">Government & Hospital Health Schemes</h2>
+              <p data-i18n="schemesSubHeader">Financial aid and subsidies to make treatments affordable for seniors</p>
+            </div>
+
+            <!-- Scheme Eligibility Calculator Widget -->
+            <div class="eligibility-widget">
+              <div class="widget-header">
+                <span class="widget-icon">💡</span>
+                <div>
+                  <h3 data-i18n="checkEligibilityTitle">Check Your Scheme Eligibility</h3>
+                  <p data-i18n="checkEligibilitySub">Answer 2 quick questions to find maximum subsidies</p>
+                </div>
+              </div>
+              <div class="eligibility-form">
+                <div class="form-row">
+                  <div class="form-col">
+                    <label class="form-label" data-i18n="patientAge">Patient Age:</label>
+                    <select id="calc-age" class="form-input" onchange="calculateSchemeEligibility()">
+                      <option value="68" selected>60+ Years (Senior Citizen)</option>
+                      <option value="45">40 - 59 Years</option>
+                      <option value="25">Below 40 Years</option>
+                    </select>
+                  </div>
+                  <div class="form-col">
+                    <label class="form-label" data-i18n="annualIncome">Annual Household Income:</label>
+                    <select id="calc-income" class="form-input" onchange="calculateSchemeEligibility()">
+                      <option value="low" selected>Below ₹2.5 Lakhs / Ayushman Card</option>
+                      <option value="mid">₹2.5L - ₹5 Lakhs</option>
+                      <option value="high">Above ₹5 Lakhs</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="eligibility-result-box" id="eligibility-result-box">
+                  <div class="res-badge">🎉 100% Eligible for 3 Major Schemes!</div>
+                  <p>You can get <strong>Free Hospitalization up to ₹5,00,000</strong> under PM-JAY and <strong>50% off on all OPD & Scans</strong> under Senior Concessions.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Schemes Directory List -->
+            <div class="schemes-list" id="schemes-list">
+              <!-- Injected via JS -->
+            </div>
+          </section>
+
+          <!-- ==================== TAB 6: DOCTOR PORTAL (When Doctor Mode Active) ==================== -->
+          <section class="tab-page" id="tab-doctor">
+            <div class="page-title-header doctor-header">
+              <div class="doctor-badge-row">
+                <span class="doc-badge">👨‍⚕️ Doctor Console</span>
+                <span class="assigned-room">My Room: <strong>Room 104 (1st Floor)</strong></span>
+              </div>
+              <h2>Dr. Rajesh Kumar (Orthopedics)</h2>
+              <p>Manage patient queue, record diagnoses, and prescribe medicines with daily timings.</p>
+            </div>
+
+            <!-- Patient Queue Selector -->
+            <div class="queue-selector-box">
+              <label class="form-label">Today's Patient Queue (Live Tokens):</label>
+              <div class="queue-tokens-row" id="doctor-queue-tokens">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+            <!-- Doctor's Patient Examination & Prescription Form -->
+            <div class="doctor-work-card">
+              <div class="patient-card-header">
+                <div class="p-info">
+                  <h3 id="doc-patient-name">Patient: Mr. Ramachandran (68y / Male)</h3>
+                  <span class="p-meta">Token: <strong id="doc-patient-token">#A-14</strong> | Phone: +91 98765 43210</span>
+                </div>
+                <span class="badge-senior">Senior Citizen</span>
+              </div>
+
+              <!-- Problem & Clinical Diagnosis Input -->
+              <div class="form-group mt-3">
+                <label class="form-label">Chief Complaint / Problem Reported:</label>
+                <input type="text" id="doc-input-problem" class="form-input" value="Severe Right Knee pain while walking, morning joint stiffness.">
+              </div>
+
+              <div class="form-group mt-3">
+                <label class="form-label">Diagnosis & Treatment Care Plan:</label>
+                <textarea id="doc-input-diagnosis" class="form-textarea" rows="3">Grade 2 Osteoarthritis of Right Knee. Advised physiotherapy exercises, hot fermentation twice daily. Avoid squatting on floor.</textarea>
+              </div>
+
+              <!-- Medicine Prescription Builder -->
+              <div class="prescription-builder-box mt-4">
+                <div class="rx-builder-header">
+                  <h4>Prescribe Medicines with Time & Day Schedule</h4>
+                  <button class="btn btn-outline btn-sm" onclick="addDoctorMedicineRow()">➕ Add Medicine</button>
+                </div>
+
+                <div class="rx-rows-container" id="doctor-rx-container">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+
+              <!-- Room Allocation & Submit -->
+              <div class="doctor-submit-row mt-4">
+                <button class="btn btn-success btn-full" onclick="saveDoctorPrescription()">
+                  💾 Save Clinical Notes & Sync to Patient's App
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== TAB 7: PROFILE, SECURITY & PAYMENT HISTORY ==================== -->
+          <section class="tab-page" id="tab-profile">
+            <div class="profile-header-card">
+              <div class="profile-avatar-large">👴</div>
+              <h3 id="profile-full-name">Mr. Ramachandran V.</h3>
+              <p class="profile-id">HeloDoc ID: <strong>HD-2026-8941</strong></p>
+              <div class="profile-badges">
+                <span class="p-pill">Age: 68</span>
+                <span class="p-pill">Blood: O+</span>
+                <span class="p-pill pill-gold">Ayushman Card Linked</span>
+              </div>
+            </div>
+
+            <!-- Security & Verification Section -->
+            <div class="profile-section-card">
+              <h4 data-i18n="accountSecurity">Account Security & Verification</h4>
+              
+              <div class="security-item">
+                <div class="sec-icon">📱</div>
+                <div class="sec-info">
+                  <strong>Phone Number Verification</strong>
+                  <span id="display-phone-no">+91 98765 43210</span>
+                </div>
+                <span class="verified-tag">✅ Verified</span>
+              </div>
+
+              <div class="security-item">
+                <div class="sec-icon">✉️</div>
+                <div class="sec-info">
+                  <strong>Google / Gmail Account</strong>
+                  <span id="display-email">ramachandran.v@gmail.com</span>
+                </div>
+                <button class="btn-outline btn-sm" onclick="openGoogleAuthModal()">Manage</button>
+              </div>
+
+              <div class="security-item">
+                <div class="sec-icon">📍</div>
+                <div class="sec-info">
+                  <strong>Hospital Geolocation Access</strong>
+                  <span>Automatic Room Navigation Enabled</span>
+                </div>
+                <span class="verified-tag">Active</span>
+              </div>
+            </div>
+
+            <!-- Emergency QR Code Card -->
+            <div class="profile-section-card qr-card">
+              <h4>Digital Health QR Card (For Doctors & Emergency)</h4>
+              <p class="qr-sub">Scan at hospital reception to instantly retrieve room assignment & medical records.</p>
+              <div class="qr-code-box" id="health-qr-box">
+                <!-- SVG QR Code Representation -->
+                <svg viewBox="0 0 100 100" width="120" height="120">
+                  <rect width="100" height="100" fill="#ffffff"/>
+                  <!-- QR Finder Patterns -->
+                  <rect x="10" y="10" width="25" height="25" fill="#0f172a"/>
+                  <rect x="15" y="15" width="15" height="15" fill="#ffffff"/>
+                  <rect x="18" y="18" width="9" height="9" fill="#1d4ed8"/>
+
+                  <rect x="65" y="10" width="25" height="25" fill="#0f172a"/>
+                  <rect x="70" y="15" width="15" height="15" fill="#ffffff"/>
+                  <rect x="73" y="18" width="9" height="9" fill="#1d4ed8"/>
+
+                  <rect x="10" y="65" width="25" height="25" fill="#0f172a"/>
+                  <rect x="15" y="70" width="15" height="15" fill="#ffffff"/>
+                  <rect x="18" y="73" width="9" height="9" fill="#1d4ed8"/>
+
+                  <!-- Data Bits -->
+                  <rect x="42" y="15" width="6" height="6" fill="#0f172a"/>
+                  <rect x="52" y="20" width="6" height="6" fill="#0f172a"/>
+                  <rect x="40" y="40" width="8" height="8" fill="#1d4ed8"/>
+                  <rect x="55" y="45" width="6" height="6" fill="#0f172a"/>
+                  <rect x="70" y="55" width="6" height="6" fill="#0f172a"/>
+                  <rect x="45" y="70" width="8" height="8" fill="#0f172a"/>
+                  <rect x="65" y="75" width="6" height="6" fill="#1d4ed8"/>
+                </svg>
+              </div>
+              <button class="btn btn-outline btn-full btn-sm mt-3" onclick="shareHealthData()">
+                📤 <span data-i18n="shareRecordBtn">Share Health Card & Records</span>
+              </button>
+            </div>
+
+            <!-- Billing & Payment History -->
+            <div class="profile-section-card">
+              <h4 data-i18n="paymentHistory">Billing & Payment Invoices</h4>
+              <div class="payment-invoice-item" style="display:flex; justify-content:space-between; align-items:center; padding:10px 0;">
+                <div>
+                  <strong style="display:block; font-size:0.9rem;">Knee Consultation & Followup</strong>
+                  <span class="inv-date" style="font-size:0.76rem; color:var(--text-muted);">Aug 22, 2026 - Paid via UPI</span>
+                </div>
+                <div class="inv-amount" style="text-align:right;">
+                  <span class="price" style="font-weight:800; color:var(--primary); font-size:0.95rem; display:block;">₹250</span>
+                  <button class="btn-outline btn-sm" onclick="downloadReceipt('INV-8941')" style="padding:2px 8px; font-size:0.75rem;">Receipt 📄</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sign Out Button -->
+            <div style="margin-top:14px;">
+              <button class="btn btn-danger btn-full" onclick="handleSignOut()">
+                🚪 <span data-i18n="signOutBtn">Sign Out / Switch Patient</span>
+              </button>
+            </div>
+          </section>
+
+        </div> <!-- End tab-content-container -->
+
+        <!-- Bottom Mobile Navigation Bar -->
+        <nav class="mobile-bottom-nav">
+          <button class="nav-tab-btn active" id="tab-btn-home" onclick="navigateToTab('home')">
+            <span class="tab-icon">🏠</span>
+            <span class="tab-label" data-i18n="navHome">Home</span>
+          </button>
+          <button class="nav-tab-btn" id="tab-btn-map" onclick="navigateToTab('map')">
+            <span class="tab-icon">🗺️</span>
+            <span class="tab-label" data-i18n="navMap">Map</span>
+          </button>
+          <button class="nav-tab-btn" id="tab-btn-appointments" onclick="navigateToTab('appointments')">
+            <span class="tab-icon">📅</span>
+            <span class="tab-label" data-i18n="navAppt">Book</span>
+          </button>
+          <button class="nav-tab-btn" id="tab-btn-medicines" onclick="navigateToTab('medicines')">
+            <span class="tab-icon">💊</span>
+            <span class="tab-label" data-i18n="navMeds">Meds</span>
+          </button>
+          <button class="nav-tab-btn" id="tab-btn-schemes" onclick="navigateToTab('schemes')">
+            <span class="tab-icon">🏛️</span>
+            <span class="tab-label" data-i18n="navSchemes">Schemes</span>
+          </button>
+          <button class="nav-tab-btn" id="tab-btn-profile" onclick="navigateToTab('profile')">
+            <span class="tab-icon">👤</span>
+            <span class="tab-label" data-i18n="navProfile">Profile</span>
+          </button>
+        </nav>
+
+        <!-- Device Bottom Gesture Bar -->
+        <div class="device-home-bar"></div>
+
+      </div> <!-- End device-screen -->
+    </div> <!-- End mobile-device-frame -->
+  </main>
+
+  <!-- ==================== MODALS & OVERLAYS ==================== -->
+
+  <!-- 1. AI Multilingual Voice Guide Assistant Modal -->
+  <div class="modal-backdrop" id="modal-ai-guide">
+    <div class="modal-card modal-ai-dialog">
+      <div class="modal-header">
+        <div class="ai-bot-avatar">
+          <span style="font-size:1.6rem;">🤖✨</span>
+          <div>
+            <h3 style="margin:0;">HeloDoc AI Voice Guide</h3>
+            <span class="ai-status" style="font-size:0.75rem; color:#16a34a; font-weight:700;">🟢 Online in 6 Languages</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-ai-guide')">✕</button>
+      </div>
+
+      <!-- Language selector inside AI guide -->
+      <div class="ai-lang-pill-row" style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-secondary); padding:8px 12px; border-radius:8px; margin:10px 0; font-size:0.84rem;">
+        <div>
+          <span>🌐 Voice Language: </span>
+          <strong id="ai-active-lang-label" style="color:var(--primary);">English</strong>
+        </div>
+        <select onchange="changeLanguage(this.value); document.getElementById('language-select').value=this.value;" style="padding:4px 8px; border-radius:6px; border:1px solid var(--border-light); font-weight:600;">
+          <option value="en">🇬🇧 English</option>
+          <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
+          <option value="ta">🇮🇳 தமிழ் (Tamil)</option>
+          <option value="te">🇮🇳 తెలుగు (Telugu)</option>
+          <option value="ml">🇮🇳 മലയാളം (Malayalam)</option>
+          <option value="es">🇪🇸 Español</option>
+        </select>
+      </div>
+
+      <div class="ai-chat-messages" id="ai-chat-box">
+        <div class="chat-bubble bot-bubble">
+          <p id="ai-welcome-msg">Hello! I am your HeloDoc Hospital Voice Assistant. Ask me anything in your language:</p>
+          <div class="ai-suggestion-chips" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">
+            <button onclick="sendAiQuickPrompt('Where is Room 401 Dermatologist?')">🇬🇧 "Where is Room 401 Dermatologist?"</button>
+            <button onclick="sendAiQuickPrompt('कमरा 401 त्वचा रोग डॉक्टर कहां है?')">🇮🇳 "कमरा 401 त्वचा रोग डॉक्टर कहां है?"</button>
+            <button onclick="sendAiQuickPrompt('அறை 401 தோல் மருத்துவர் எங்கே?')">🇮🇳 "அறை 401 தோல் மருத்துவர் எங்கே?"</button>
+            <button onclick="sendAiQuickPrompt('రూమ్ 401 స్కిన్ డాక్టర్ ఎక్కడ ఉంది?')">🇮🇳 "రూమ్ 401 స్కిన్ డాక్టర్ ఎక్కడ ఉంది?"</button>
+            <button onclick="sendAiQuickPrompt('¿Dónde está la Habitación 401 Dermatología?')">🇪🇸 "¿Dónde está la Habitación 401?"</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-input-bar">
+        <button class="ai-mic-btn" id="ai-mic-btn" onclick="toggleSpeechRecognition()" title="Press to speak in your language">
+          <span>🎙️</span>
+        </button>
+        <input type="text" id="ai-text-input" placeholder="Type or speak in your language..." onkeypress="handleAiKeyPress(event)">
+        <button class="ai-send-btn" onclick="sendAiUserMessage()">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Online Payment & Invoice Checkout Modal -->
+  <div class="modal-backdrop" id="modal-payment">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>💳 Hospital Online Payment</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-payment')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="bill-summary-card">
+          <div class="bill-row">
+            <span>Doctor Consultation Fee:</span>
+            <span>₹500.00</span>
+          </div>
+          <div class="bill-row">
+            <span>Hospital Registration & OPD Card:</span>
+            <span>₹50.00</span>
+          </div>
+          <div class="bill-row subsidy-row">
+            <span>🏛️ Senior Citizen Scheme Subsidy (50%):</span>
+            <span class="green-text">-₹250.00</span>
+          </div>
+          <hr class="bill-divider">
+          <div class="bill-row total-row">
+            <strong>Total Amount to Pay:</strong>
+            <strong class="total-price" id="pay-total-amount">₹300.00</strong>
+          </div>
+        </div>
+
+        <label class="form-label mt-3">Select Payment Method:</label>
+        <div class="payment-methods-grid">
+          <button class="pay-method-btn active" onclick="selectPayMethod('upi', this)">
+            <span>📱</span> <strong>UPI / GPay / PhonePe / Paytm</strong>
+          </button>
+          <button class="pay-method-btn" onclick="selectPayMethod('card', this)">
+            <span>💳</span> <strong>Debit / Credit Card / NetBanking</strong>
+          </button>
+          <button class="pay-method-btn" onclick="selectPayMethod('cash', this)">
+            <span>🏥</span> <strong>Pay Cash at Hospital Counter</strong>
+          </button>
+        </div>
+
+        <div class="upi-input-box mt-3" id="upi-input-box">
+          <label class="form-label">Enter UPI ID or Mobile Number:</label>
+          <input type="text" class="form-input" id="input-upi-id" placeholder="9876543210@upi or yourname@okaxis" value="9876543210@paytm">
+        </div>
+
+        <button class="btn btn-success btn-full mt-4" onclick="processPaymentAndDownload()">
+          🔒 Pay ₹300 & Download Official Hospital Receipt
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Google Sign-in Verification Modal -->
+  <div class="modal-backdrop" id="modal-google-auth">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Google Account Verification</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-google-auth')">✕</button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <div style="margin:10px 0 16px;">
+          <svg viewBox="0 0 48 48" width="54" height="54">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.55 10.79l7.98-6.2z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+        </div>
+        <h4>ramachandran.v@gmail.com</h4>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin:6px 0 16px;">
+          HeloDoc will use this account to securely synchronize prescriptions, room bookings, and government health schemes.
+        </p>
+        <button class="btn btn-primary btn-full" onclick="confirmGoogleLoginSuccess()">
+          Continue as Ramachandran V.
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. SOS Emergency Alert Modal -->
+  <div class="modal-backdrop" id="modal-sos">
+    <div class="modal-card sos-dialog">
+      <div class="sos-modal-header">
+        <span class="sos-icon-huge">🚨</span>
+        <h2>Emergency SOS Activated</h2>
+        <p>Connecting you directly to City Care Emergency Desk & Ambulance</p>
+      </div>
+      <div class="modal-body">
+        <div class="emergency-info-box">
+          <div class="loc-row">
+            <span>📍 Your Location in Hospital:</span>
+            <strong>Ground Floor Lobby / GPS: 13.0827° N, 80.2707° E</strong>
+          </div>
+          <div class="loc-row">
+            <span>👨‍⚕️ Emergency Ward:</span>
+            <strong>Room 001 - Trauma & ER Care</strong>
+          </div>
+        </div>
+
+        <div class="sos-actions-stack">
+          <button class="btn btn-danger btn-full btn-large" onclick="callHospitalAmbulance()">
+            📞 Call Hospital Ambulance (108 / +91 44 2800 1234)
+          </button>
+          <button class="btn btn-outline btn-full" onclick="alertCaregiverSMS()">
+            📱 Send SOS SMS to Family (Kavitha - Daughter)
+          </button>
+          <button class="btn btn-secondary btn-full" onclick="closeModal('modal-sos')">
+            Cancel False Alarm
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Printable / Downloadable Hospital Receipt Modal -->
+  <div class="modal-backdrop" id="modal-receipt">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🧾 HeloDoc Digital Invoice</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-receipt')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="receipt-paper" id="printable-receipt">
+          <div class="receipt-header">
+            <h4>CITY CARE MULTI-SPECIALTY HOSPITAL</h4>
+            <p>No. 45, Healthcare Avenue, Medical Center</p>
+            <div class="receipt-badge">OFFICIAL PAYMENT RECEIPT</div>
+          </div>
+          <hr style="margin:10px 0; border:none; border-top:1px solid #e2e8f0;">
+          <div class="receipt-meta-grid">
+            <div><strong>Receipt No:</strong> <span id="rec-no">HD-INV-8941</span></div>
+            <div><strong>Date:</strong> <span id="rec-date">Aug 22, 2026</span></div>
+            <div><strong>Patient:</strong> <span id="rec-patient">Mr. Ramachandran (68y)</span></div>
+            <div><strong>Token No:</strong> <span id="rec-token">#A-14</span></div>
+            <div><strong>Doctor:</strong> <span id="rec-doc">Dr. Rajesh Kumar (Room 104)</span></div>
+            <div><strong>Payment Mode:</strong> <span>UPI (Success)</span></div>
+          </div>
+          <hr style="margin:10px 0; border:none; border-top:1px solid #e2e8f0;">
+          <table class="receipt-table">
+            <thead>
+              <tr><th>Description</th><th>Qty</th><th>Amount</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>OPD Consultation - Orthopedics</td><td>1</td><td>₹500.00</td></tr>
+              <tr><td>Hospital Registration</td><td>1</td><td>₹50.00</td></tr>
+              <tr style="color:#16a34a; font-weight:700;"><td>Senior Citizen Scheme Subsidy (50%)</td><td>1</td><td>-₹250.00</td></tr>
+            </tbody>
+            <tfoot>
+              <tr><th colspan="2">Net Amount Paid:</th><th>₹300.00</th></tr>
+            </tfoot>
+          </table>
+          <div class="receipt-footer">
+            <p>Thank you for choosing City Care Hospital & HeloDoc!</p>
+            <small>Room 104 is located on the 1st Floor. Use HeloDoc map for step-by-step room routing.</small>
+          </div>
+        </div>
+        <div class="modal-actions-row mt-3">
+          <button class="btn btn-primary btn-full" onclick="printReceipt()">🖨️ Print / Save as PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Data Sharing Modal -->
+  <div class="modal-backdrop" id="modal-share">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📤 Share Medical Card & Records</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-share')">✕</button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">
+          Send your live room token, prescription, and hospital report to family members or doctors.
+        </p>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <button class="btn btn-success btn-full" onclick="shareViaWhatsApp()">
+            💬 Share via WhatsApp (+91 98765 43210)
+          </button>
+          <button class="btn btn-primary btn-full" onclick="shareViaSMS()">
+            📱 Send SMS to Caregiver
+          </button>
+          <button class="btn btn-outline btn-full" onclick="downloadMedicalSummaryPDF()">
+            📄 Download Complete Summary (PDF)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Room Photo & Detail Inspection Modal -->
+  <div class="modal-backdrop" id="modal-room-photo" onclick="closeRoomPhotoModal(event)">
+    <div class="modal-card room-modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="room-badge-pill" id="modal-room-badge" style="background:#1d4ed8; color:#fff; padding:4px 10px; border-radius:12px; font-weight:800; font-size:0.85rem;">Room 401</span>
+          <h3 id="modal-room-title" style="margin:0; font-size:1.1rem; color:var(--text-main);">Room 401 - Dermatologist Clinic</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeRoomPhotoModal()">✕</button>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <p id="modal-room-dept" style="font-size:0.85rem; color:var(--text-muted); margin-top:0; margin-bottom:12px;">1st Floor • Skin Care & Dermatology</p>
+        
+        <div class="room-photo-frame" style="position:relative; width:100%; border-radius:12px; overflow:hidden; box-shadow:0 4px 14px rgba(0,0,0,0.15); margin-bottom:14px; background:#1e293b;">
+          <img id="modal-room-img" src="assets/rooms/room_dermatology.jpg" alt="Room Photo" style="width:100%; height:220px; object-fit:cover; display:block;">
+          <span style="position:absolute; bottom:10px; right:10px; background:rgba(15,23,42,0.85); color:#fff; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; backdrop-filter:blur(4px);">📷 Live Room Photo</span>
+        </div>
+
+        <div class="room-detail-info-grid" style="display:flex; flex-direction:column; gap:10px; text-align:left; background:var(--bg-secondary); padding:12px; border-radius:10px; font-size:0.88rem;">
+          <div><strong style="color:var(--text-main);">👨‍⚕️ Assigned Specialist:</strong> <span id="modal-room-doc" style="color:var(--text-sub);">Dr. Priya Ramesh</span></div>
+          <div><strong style="color:var(--text-main);">🔬 Medical Equipment:</strong> <span id="modal-room-equip" style="color:var(--text-sub);">Dermatoscope, Laser Skin Scanner</span></div>
+          <div><strong style="color:var(--text-main);">🟢 Status:</strong> <span style="color:#16a34a; font-weight:700;">Active & Ready for Navigation</span></div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:16px;">
+          <button class="btn btn-primary btn-full" onclick="quickGuideFromModal()">👉 Guide Me To Room</button>
+          <button class="btn btn-outline" onclick="closeRoomPhotoModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Medicine Home Delivery Order Modal -->
+  <div class="modal-backdrop" id="modal-medicine-delivery">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:1.4rem;">🚚</span>
+          <h3 style="margin:0; font-size:1.15rem;">Home Medicine Delivery</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-medicine-delivery')">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px;">
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:10px 12px; margin-bottom:14px; font-size:0.82rem; color:#166534;">
+          <strong>✅ Doctor Prescribed Medicines Auto-Attached:</strong>
+          <ul style="margin:6px 0 0 16px; padding:0; line-height:1.4;">
+            <li>Glucosamine & Chondroitin (500mg) - Morning (15 Days)</li>
+            <li>Pantoprazole (40mg) - Morning (10 Days)</li>
+            <li>Calcium + Vit D3 (Calcimax) - Afternoon (30 Days)</li>
+            <li>Diacerein (50mg Joint Care) - Night (30 Days)</li>
+          </ul>
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label" style="font-weight:700;">Select Delivery Address:</label>
+          <select id="delivery-address-select" class="form-input">
+            <option value="home" selected>🏠 Home: No. 45, Anna Nagar, Chennai - 600040</option>
+            <option value="daughter">🏡 Caregiver (Kavitha Daughter): Adyar, Chennai - 600020</option>
+            <option value="gps">📍 Current GPS Location (Synced)</option>
+          </select>
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label" style="font-weight:700;">Delivery Speed & Options:</label>
+          <div style="display:flex; gap:10px;">
+            <label style="flex:1; border:1.5px solid #1d4ed8; background:#eff6ff; padding:10px; border-radius:10px; cursor:pointer; font-size:0.82rem; font-weight:600; text-align:center;">
+              <input type="radio" name="del-speed" value="express" checked> ⚡ Express 2-Hour (₹30)
+            </label>
+            <label style="flex:1; border:1.5px solid var(--border-light); background:#ffffff; padding:10px; border-radius:10px; cursor:pointer; font-size:0.82rem; font-weight:600; text-align:center;">
+              <input type="radio" name="del-speed" value="standard"> 🚚 Standard Today (FREE)
+            </label>
+          </div>
+        </div>
+
+        <div class="bill-summary-card" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:16px;">
+          <div class="bill-row" style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;">
+            <span>Hospital Pharmacy MRP Total:</span>
+            <span><del>₹850.00</del></span>
+          </div>
+          <div class="bill-row" style="display:flex; justify-content:space-between; font-size:0.85rem; color:#16a34a; font-weight:700; margin-bottom:4px;">
+            <span>🏛️ Jan Aushadhi Govt Generic Discount (80%):</span>
+            <span>-₹670.00</span>
+          </div>
+          <div class="bill-row" style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;">
+            <span>Express Delivery Charge:</span>
+            <span>₹30.00</span>
+          </div>
+          <hr style="margin:8px 0; border:none; border-top:1px solid #cbd5e1;">
+          <div class="bill-row total-row" style="display:flex; justify-content:space-between; font-size:1.05rem; font-weight:800; color:#1e293b;">
+            <span>Final Amount to Pay:</span>
+            <span style="color:#1d4ed8;">₹210.00</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-success btn-full" onclick="confirmHomeMedicineDeliveryOrder()" style="font-weight:700;">
+            ✅ Confirm & Order Delivery (₹210)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three.js Library for 3D Viewport Ambiance -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
